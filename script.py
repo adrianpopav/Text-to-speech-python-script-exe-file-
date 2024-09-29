@@ -6,6 +6,7 @@ from threading import Thread
 import pygame
 import time
 from ttkbootstrap import Style
+from PIL import Image, ImageTk  # Pentru lucrul cu imagini
 
 # Dicționar pentru maparea limbilor umane la codurile de limbă
 languages = {"English": "en", "Romanian": "ro", "French": "fr", "Spanish": "es"}
@@ -99,39 +100,57 @@ style = Style(theme="flatly")  # Alege un tema modern
 window.title("Text to Speech Player by Adi")
 window.geometry("500x500")
 
-# Etichetă și câmp de text
-tk.Label(window, text="Write text:", font=("Arial", 12)).pack(pady=5)
-text_box = tk.Text(window, height=5, width=50, bd=1, relief='solid')
-text_box.pack(pady=5)
+# Fereastra nu mai este redimensionabilă
+window.resizable(False, False)
 
-# Selectarea limbii
-tk.Label(window, text="Choose Language:", font=("Arial", 12)).pack(pady=5)
+# Setarea iconiței personalizate
+icon_path = "img/1.ico"  # Asigură-te că fișierul se află în calea corectă
+window.iconbitmap(icon_path)
+
+# Încarcă imaginea de background
+bg_image_path = "img/bg.jpg"  # Calea către imaginea de background
+bg_image = Image.open(bg_image_path)
+bg_image = bg_image.resize((500, 500), Image.Resampling.LANCZOS)  # Redimensionează imaginea la dimensiunea ferestrei
+bg_photo = ImageTk.PhotoImage(bg_image)
+
+# Creare Canvas pentru a afișa imaginea de background
+canvas = tk.Canvas(window, width=500, height=500)
+canvas.pack(fill="both", expand=True)
+
+# Afișează imaginea de background pe Canvas
+canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+# Adăugare widget-uri peste Canvas
+canvas.create_text(250, 20, text="Write text:", font=("Arial", 12), fill="white")
+
+text_box = tk.Text(window, height=5, width=50, bd=1, relief='solid')
+canvas.create_window(250, 80, window=text_box)
+
+# Ajustare spațiere între textul "Choose Language" și caseta text
+canvas.create_text(250, 140, text="Choose Language:", font=("Arial", 12), fill="white")
+
 language_var = tk.StringVar(value="English")
 language_menu = ttk.Combobox(window, textvariable=language_var, values=list(languages.keys()), state="readonly")
-language_menu.pack(pady=5)
+canvas.create_window(250, 170, window=language_menu)
 
-# Buton de conversie
 convert_button = ttk.Button(window, text="Convert", command=convert_text_to_speech)
-convert_button.pack(pady=10)
+canvas.create_window(250, 210, window=convert_button)
 
-# Etichetă pentru status
 status_label = tk.Label(window, text="", fg="green", font=("Arial", 10))
-status_label.pack()
+canvas.create_window(250, 240, window=status_label)
 
-# Buton de descărcare (inițial dezactivat)
 download_button = ttk.Button(window, text="Download MP3", state=tk.DISABLED, command=download_mp3)
-download_button.pack(pady=10)
+canvas.create_window(250, 270, window=download_button)
 
-# Player audio cu timeline
-tk.Label(window, text="Player MP3:", font=("Arial", 12)).pack(pady=5)
+# Ajustare spațiere pentru player MP3
+canvas.create_text(250, 320, text="Player MP3:", font=("Arial", 12), fill="white")
 
-# Timeline slider
 progress_var = tk.IntVar()
 timeline_slider = ttk.Scale(window, from_=0, to=100, orient='horizontal', variable=progress_var, state=tk.DISABLED)
-timeline_slider.pack(pady=10)
+canvas.create_window(250, 350, window=timeline_slider)
 
 play_button = ttk.Button(window, text="Play it", state=tk.DISABLED, command=play_audio)
-play_button.pack(pady=5)
+canvas.create_window(250, 390, window=play_button)
 
 # Rulare interfață grafică
 window.mainloop()
